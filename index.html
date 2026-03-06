@@ -26,22 +26,26 @@
 <section>
 <h2>Lista de tareas</h2>
 
-<div class="task">
-<span class="title">Estudiar HTML</span>
-<span class="category">Estudio</span>
-<span class="priority high">Alta</span>
-</div>
+<!-- Input de búsqueda -->
+<input type="text" id="search" placeholder="Buscar tarea">
 
-<div class="task">
-<span class="title">Comprar comida</span>
-<span class="category">Personal</span>
-<span class="priority medium">Media</span>
-</div>
+<!-- Formulario para añadir nuevas tareas -->
+<form>
+<input type="text" placeholder="Nueva tarea" required>
+<button>Añadir</button>
+</form>
+
+<!-- Lista de tareas -->
+<ul id="task-list">
+<!-- Aquí se añadirán dinámicamente las tareas -->
+</ul>
 
 </section>
 
 </main>
+
 <script src="app.js"></script>
 </body>
 </html>
+
 
