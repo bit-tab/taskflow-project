@@ -1,63 +1,51 @@
-// Seleccionamos elementos
-const form = document.querySelector('form');           // Formulario para añadir tarea
-const input = document.querySelector('form input');    // Input del formulario
-const taskList = document.getElementById('task-list'); // Lista donde van las tareas
-const searchInput = document.getElementById('search');// Input de búsqueda
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>TaskFlow</title>
+<link rel="stylesheet" href="style.css">
+</head>
 
-// Array para almacenar tareas
-let tasks = [];
+<body>
 
-// Escuchar el submit del formulario
-form.addEventListener('submit', function(e) {
-    e.preventDefault(); // Evita recargar la página
-    const taskText = input.value.trim(); // Texto sin espacios al inicio/final
-    if (taskText !== '') {
-        addTask(taskText);
-        input.value = ''; // Limpiar input
-    }
-});
+<header>
+<h1>TaskFlow</h1>
+</header>
 
-// Función para añadir tarea al DOM y al array
-function addTask(text) {
-    const li = document.createElement('li');
-    li.textContent = text;
+<main>
 
-    // Botón de eliminar
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = 'Eliminar';
-    deleteBtn.addEventListener('click', function() {
-        taskList.removeChild(li);              // Eliminar del DOM
-        tasks = tasks.filter(t => t !== text); // Eliminar del array
-        saveTasks();                            // Guardar cambios
-    });
+<aside>
+<h2>Categorías</h2>
+<ul>
+<li>Trabajo</li>
+<li>Personal</li>
+<li>Estudio</li>
+</ul>
+</aside>
 
-    li.appendChild(deleteBtn);
-    taskList.appendChild(li);
+<section>
+<h2>Lista de tareas</h2>
 
-    // Añadir al array y guardar
-    tasks.push(text);
-    saveTasks();
-}
+<!-- Input de búsqueda -->
+<input type="text" id="search" placeholder="Buscar tarea">
 
-// Guardar tareas en LocalStorage
-function saveTasks() {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-}
+<!-- Formulario para añadir nuevas tareas -->
+<form>
+<input type="text" placeholder="Nueva tarea" required>
+<button>Añadir</button>
+</form>
 
-// Cargar tareas al iniciar la aplicación
-window.addEventListener('load', function() {
-    const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
-    tasks = savedTasks;
-    tasks.forEach(task => addTask(task));
-});
+<!-- Lista de tareas -->
+<ul id="task-list">
+<!-- Aquí se añadirán dinámicamente las tareas -->
+</ul>
 
-// Filtro de búsqueda (bonus)
-searchInput.addEventListener('input', function() {
-    const filter = searchInput.value.toLowerCase();
-    document.querySelectorAll('#task-list li').forEach(li => {
-        li.style.display = li.textContent.toLowerCase().includes(filter) ? '' : 'none';
-    });
-});
+</section>
 
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
 
 
