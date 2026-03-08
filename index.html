@@ -1,51 +1,31 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="bg-white text-gray-800 dark:bg-gray-900 dark:text-gray-100">
 <head>
-<meta charset="UTF-8">
-<title>TaskFlow</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow</title>
+    <script src="app.js" defer></script>
+    <link href="style.css" rel="stylesheet">
 </head>
+<body class="min-h-screen flex flex-col items-center p-6 transition-colors duration-300">
 
-<body>
+    <header class="w-full max-w-xl mb-6 flex justify-between items-center">
+        <h1 class="text-3xl font-bold">TaskFlow</h1>
+        <button id="dark-toggle" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+            Modo oscuro
+        </button>
+    </header>
 
-<header>
-<h1>TaskFlow</h1>
-</header>
+    <form class="w-full max-w-xl flex gap-2 mb-4">
+        <input type="text" placeholder="Añade una tarea" class="flex-1 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:border-gray-600">
+        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition">
+            Añadir
+        </button>
+    </form>
 
-<main>
+    <input type="text" id="search" placeholder="Buscar tarea" class="w-full max-w-xl px-4 py-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:border-gray-600">
 
-<aside>
-<h2>Categorías</h2>
-<ul>
-<li>Trabajo</li>
-<li>Personal</li>
-<li>Estudio</li>
-</ul>
-</aside>
+    <ul id="task-list" class="w-full max-w-xl space-y-2"></ul>
 
-<section>
-<h2>Lista de tareas</h2>
-
-<!-- Input de búsqueda -->
-<input type="text" id="search" placeholder="Buscar tarea">
-
-<!-- Formulario para añadir nuevas tareas -->
-<form>
-<input type="text" placeholder="Nueva tarea" required>
-<button>Añadir</button>
-</form>
-
-<!-- Lista de tareas -->
-<ul id="task-list">
-<!-- Aquí se añadirán dinámicamente las tareas -->
-</ul>
-
-</section>
-
-</main>
-
-<script src="app.js"></script>
 </body>
 </html>
-
-

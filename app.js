@@ -58,3 +58,11 @@ searchInput.addEventListener('input', function() {
         li.style.display = li.textContent.toLowerCase().includes(filter) ? '' : 'none';
     });
 });;
+// Botón modo oscuro
+const themeToggle = document.getElementById("themeToggle");
+
+if (themeToggle) {
+    themeToggle.addEventListener("click", function() {
+        document.documentElement.classList.toggle("dark");
+    });
+}
