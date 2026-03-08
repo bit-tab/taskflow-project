@@ -1,68 +1,66 @@
-// Seleccionamos elementos
-const form = document.querySelector('form');           // Formulario para añadir tarea
-const input = document.querySelector('form input');    // Input del formulario
-const taskList = document.getElementById('task-list'); // Lista donde van las tareas
-const searchInput = document.getElementById('search');// Input de búsqueda
+const taskForm = document.getElementById('taskForm');
+const taskInput = document.getElementById('taskInput');
+const taskList = document.getElementById('taskList');
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+const taskCounter = document.getElementById('taskCounter');
 
-// Array para almacenar tareas
-let tasks = [];
-
-// Escuchar el submit del formulario
-form.addEventListener('submit', function(e) {
-    e.preventDefault(); // Evita recargar la página
-    const taskText = input.value.trim(); // Texto sin espacios al inicio/final
-    if (taskText !== '') {
-        addTask(taskText);
-        input.value = ''; // Limpiar input
-    }
+// --- MODO OSCURO ---
+themeToggle.addEventListener('click', () => {
+    document.documentElement.classList.toggle('dark');
+    const isDark = document.documentElement.classList.contains('dark');
+    themeIcon.innerText = isDark ? '☀️' : '🌙';
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
 });
 
-// Función para añadir tarea al DOM y al array
-function addTask(text) {
-    const li = document.createElement('li');
-    li.textContent = text;
-
-    // Botón de eliminar
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = 'Eliminar';
-    deleteBtn.addEventListener('click', function() {
-        taskList.removeChild(li);              // Eliminar del DOM
-        tasks = tasks.filter(t => t !== text); // Eliminar del array
-        saveTasks();                            // Guardar cambios
-    });
-
-    li.appendChild(deleteBtn);
-    taskList.appendChild(li);
-
-    // Añadir al array y guardar
-    tasks.push(text);
-    saveTasks();
+// Cargar tema al inicio
+if (localStorage.getItem('theme') === 'dark') {
+    document.documentElement.classList.add('dark');
+    themeIcon.innerText = '☀️';
 }
 
-// Guardar tareas en LocalStorage
-function saveTasks() {
+// --- GESTIÓN DE TAREAS ---
+let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+function renderTasks() {
+    taskList.innerHTML = '';
+    const colors = [
+        'bg-blue-100 border-blue-300 dark:bg-blue-900/30',
+        'bg-purple-100 border-purple-300 dark:bg-purple-900/30',
+        'bg-pink-100 border-pink-300 dark:bg-pink-900/30',
+        'bg-emerald-100 border-emerald-300 dark:bg-emerald-900/30'
+    ];
+
+    tasks.forEach((task, index) => {
+        const colorClass = colors[index % colors.length];
+        const div = document.createElement('div');
+        div.className = `flex justify-between items-center p-6 rounded-[2rem] border-2 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-300 ${colorClass}`;
+        
+        div.innerHTML = `
+            <span class="text-lg font-medium dark:text-slate-200">${task}</span>
+            <button onclick="deleteTask(${index})" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/50 hover:bg-red-500 hover:text-white transition-all text-red-500 shadow-sm">
+                ✕
+            </button>
+        `;
+        taskList.appendChild(div);
+    });
+
+    taskCounter.innerText = `Tienes ${tasks.length} tareas pendientes`;
     localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
-// Cargar tareas al iniciar la aplicación
-window.addEventListener('load', function() {
-    const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
-    tasks = savedTasks;
-    tasks.forEach(task => addTask(task));
+taskForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (taskInput.value.trim()) {
+        tasks.push(taskInput.value.trim());
+        taskInput.value = '';
+        renderTasks();
+    }
 });
 
-// Filtro de búsqueda (bonus)
-searchInput.addEventListener('input', function() {
-    const filter = searchInput.value.toLowerCase();
-    document.querySelectorAll('#task-list li').forEach(li => {
-        li.style.display = li.textContent.toLowerCase().includes(filter) ? '' : 'none';
-    });
-});;
-// Botón modo oscuro
-const themeToggle = document.getElementById("themeToggle");
+window.deleteTask = (index) => {
+    tasks.splice(index, 1);
+    renderTasks();
+};
 
-if (themeToggle) {
-    themeToggle.addEventListener("click", function() {
-        document.documentElement.classList.toggle("dark");
-    });
-}
+renderTasks();

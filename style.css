@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Opcional: Para que las nubes se sientan más como nubes */
+.task-card {
+    border-radius: 50px;
+}
