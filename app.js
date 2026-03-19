@@ -5,6 +5,7 @@ const themeToggle = document.getElementById('themeToggle');
 const themeIcon = document.getElementById('themeIcon');
 const taskCounter = document.getElementById('taskCounter');
 const searchInput = document.getElementById('searchInput'); // Nuevo
+const searchButton = document.getElementById('searchButton');
 
 // --- MODO OSCURO (Se mantiene igual) ---
 themeToggle.addEventListener('click', () => {
@@ -55,7 +56,35 @@ function renderTasks(filter = '') {
 // Evento para el buscador
 searchInput.addEventListener('input', (e) => {
     renderTasks(e.target.value);
+    updateSearchButton();
 });
+
+function updateSearchButton() {
+    const hasQuery = searchInput.value.trim().length > 0;
+
+    if (hasQuery) {
+        searchButton.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+        searchButton.classList.add('bg-rose-600', 'hover:bg-rose-700');
+        searchButton.innerHTML = '<span aria-hidden="true">✕</span> Limpiar';
+    } else {
+        searchButton.classList.remove('bg-rose-600', 'hover:bg-rose-700');
+        searchButton.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+        searchButton.innerHTML = '<span aria-hidden="true">🔍</span> Buscar';
+    }
+}
+
+searchButton.addEventListener('click', () => {
+    if (searchInput.value.trim().length > 0) {
+        // Limpiamos el input para volver a mostrar todas las tareas.
+        searchInput.value = '';
+        renderTasks('');
+        updateSearchButton();
+    } else {
+        renderTasks(searchInput.value);
+    }
+});
+
+updateSearchButton();
 
 taskForm.addEventListener('submit', (e) => {
     e.preventDefault();
