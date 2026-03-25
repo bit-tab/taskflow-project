@@ -3,27 +3,51 @@ const taskInput = document.getElementById('taskInput');
 const taskList = document.getElementById('taskList');
 const themeToggle = document.getElementById('themeToggle');
 const themeIcon = document.getElementById('themeIcon');
-const taskCounter = document.getElementById('taskCounter');
+const taskCounterAside = document.getElementById('taskCounterAside');
+const taskCounterSearch = document.getElementById('taskCounterSearch');
 const searchInput = document.getElementById('searchInput'); // Nuevo
 const searchButton = document.getElementById('searchButton');
 
-// --- MODO OSCURO (Se mantiene igual) ---
-themeToggle.addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-    const isDark = document.documentElement.classList.contains('dark');
-    themeIcon.innerText = isDark ? '☀️' : '🌙';
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-});
+const SEARCH_BUTTON_BASE =
+    'shrink-0 px-5 py-3 rounded-[1.25rem] text-white font-bold text-sm transition-all hover:shadow-lg active:scale-95 shadow-indigo-500/30';
 
-if (localStorage.getItem('theme') === 'dark') {
-    document.documentElement.classList.add('dark');
-    themeIcon.innerText = '☀️';
+function getQuery() {
+    return searchInput ? searchInput.value.trim() : '';
+}
+
+// --- MODO OSCURO (Se mantiene igual) ---
+if (themeToggle && themeIcon) {
+    themeToggle.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        const isDark = document.documentElement.classList.contains('dark');
+        themeIcon.innerText = isDark ? '☀️' : '🌙';
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+
+    if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+        themeIcon.innerText = '☀️';
+    }
 }
 
 // --- GESTIÓN DE TAREAS ---
-let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+let tasks = [];
+try {
+    const raw = localStorage.getItem('tasks');
+    if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+            // Solo aceptamos elementos string para que el filtrado no reviente
+            tasks = parsed.filter(t => typeof t === 'string');
+        }
+    }
+} catch (err) {
+    // Si hay datos corruptos, empezamos limpio
+    tasks = [];
+}
 
 function renderTasks(filter = '') {
+    if (!taskList) return;
     taskList.innerHTML = '';
     const colors = [
         'bg-blue-100 border-blue-300 dark:bg-blue-900/30',
@@ -33,67 +57,85 @@ function renderTasks(filter = '') {
     ];
 
     // Aplicamos el filtro del buscador
-    const filteredTasks = tasks.filter(t => t.toLowerCase().includes(filter.toLowerCase()));
+    const query = filter.toLowerCase();
+    const filteredTasks = tasks
+        .map((t, index) => ({ task: String(t), index }))
+        .filter(({ task }) => task.toLowerCase().includes(query));
 
-    filteredTasks.forEach((task, index) => {
-        const colorClass = colors[index % colors.length];
+    filteredTasks.forEach(({ task, index: originalIndex }, renderIndex) => {
+        const colorClass = colors[renderIndex % colors.length];
         const div = document.createElement('div');
         div.className = `flex justify-between items-center p-6 rounded-[2rem] border-2 shadow-sm ${colorClass}`;
         
         div.innerHTML = `
             <span class="text-lg font-medium dark:text-slate-200">${task}</span>
-            <button onclick="deleteTask(${index})" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/50 hover:bg-red-500 hover:text-white transition-all text-red-500 shadow-sm">
+            <button onclick="deleteTask(${originalIndex})" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/50 hover:bg-red-500 hover:text-white transition-all text-red-500 shadow-sm">
                 ✕
             </button>
         `;
         taskList.appendChild(div);
     });
 
-    taskCounter.innerText = `Tareas encontradas: ${filteredTasks.length}`;
+    // Contador de tareas pendientes (lado izquierdo)
+    if (taskCounterAside) {
+        taskCounterAside.innerText = `Tienes ${tasks.length} tareas pendientes`;
+    }
+    // Contador de tareas filtradas (lado derecho)
+    if (taskCounterSearch) {
+        taskCounterSearch.innerText = `Tareas encontradas: ${filteredTasks.length}`;
+    }
     localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
 // Evento para el buscador
-searchInput.addEventListener('input', (e) => {
-    renderTasks(e.target.value);
-    updateSearchButton();
-});
-
-function updateSearchButton() {
-    const hasQuery = searchInput.value.trim().length > 0;
-
-    if (hasQuery) {
-        searchButton.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
-        searchButton.classList.add('bg-rose-600', 'hover:bg-rose-700');
-        searchButton.innerHTML = '<span aria-hidden="true">✕</span> Limpiar';
-    } else {
-        searchButton.classList.remove('bg-rose-600', 'hover:bg-rose-700');
-        searchButton.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
-        searchButton.innerHTML = '<span aria-hidden="true">🔍</span> Buscar';
-    }
+if (searchInput && searchButton) {
+    searchInput.addEventListener('input', (e) => {
+        renderTasks(e.target.value);
+        updateSearchButton();
+    });
 }
 
-searchButton.addEventListener('click', () => {
-    if (searchInput.value.trim().length > 0) {
-        // Limpiamos el input para volver a mostrar todas las tareas.
-        searchInput.value = '';
-        renderTasks('');
-        updateSearchButton();
-    } else {
-        renderTasks(searchInput.value);
-    }
-});
+function updateSearchButton() {
+    if (!searchInput || !searchButton) return;
+    const hasQuery = getQuery().length > 0;
 
-updateSearchButton();
+    const bgClass = hasQuery
+        ? 'bg-rose-600 hover:bg-rose-700'
+        : 'bg-indigo-600 hover:bg-indigo-700';
 
-taskForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (taskInput.value.trim()) {
-        tasks.push(taskInput.value.trim());
-        taskInput.value = '';
-        renderTasks();
-    }
-});
+    searchButton.className = `${SEARCH_BUTTON_BASE} ${bgClass}`;
+    searchButton.innerHTML = hasQuery
+        ? '<span aria-hidden="true">✕</span> Limpiar'
+        : '<span aria-hidden="true">🔍</span> Buscar';
+}
+
+if (searchInput && searchButton) {
+    searchButton.addEventListener('click', () => {
+        const query = getQuery();
+        if (query.length > 0) {
+            // Limpiamos el input para volver a mostrar todas las tareas.
+            searchInput.value = '';
+            renderTasks('');
+            updateSearchButton();
+        } else {
+            renderTasks(query);
+        }
+    });
+
+    updateSearchButton();
+}
+
+if (taskForm && taskInput) {
+    taskForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const value = taskInput.value.trim();
+        if (value) {
+            tasks.push(value);
+            taskInput.value = '';
+            renderTasks();
+        }
+    });
+}
 
 window.deleteTask = (index) => {
     tasks.splice(index, 1);
