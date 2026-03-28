@@ -11,7 +11,7 @@ const toggleDark = (force) => {
     // Forzamos el color de fondo del body para evitar el blanco
     document.body.style.backgroundColor = isDark ? '#070a13' : '#fdf2f8';
 };
-
+//Alterna la clase .dark en el documento y persiste la elección en LocalStorage.
 themeToggle.addEventListener('click', () => toggleDark());
 if (localStorage.getItem('theme') === 'dark') toggleDark(true);
 
@@ -34,7 +34,7 @@ form.addEventListener('submit', (e) => {
     input.value = '';
     render();
 });
-
+//Añade una nueva tarea a un proyecto o categoría.
 window.addTask = (projectId, catId = null) => {
     const text = prompt("¿Qué hay que hacer?");
     if (!text) return;
@@ -49,6 +49,7 @@ window.addTask = (projectId, catId = null) => {
     render();
 };
 
+//Añade un nuevo contenedor temático dentro de un proyecto existente
 window.addCategory = (projectId) => {
     const name = prompt("Nombre de la categoría:");
     if (!name) return;
@@ -56,6 +57,7 @@ window.addCategory = (projectId) => {
     render();
 };
 
+//Cambia el estado de una tarea entre pendiente, proceso y hecho.
 window.cycleStatus = (projectId, catId, taskId) => {
     const p = projects.find(p => p.id == projectId);
     let t = catId 
@@ -74,6 +76,7 @@ window.deleteProject = (id) => {
     }
 };
 
+//La función principal. Limpia el DOM y vuelve a dibujar los proyectos basándose en el array projects.
 // --- RENDERIZADO ---
 const render = () => {
     localStorage.setItem('tf_data', JSON.stringify(projects));
