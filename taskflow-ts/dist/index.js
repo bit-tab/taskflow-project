@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const task_service_1 = require("./task-service");
+const t1 = (0, task_service_1.createTask)({ title: "Aprender TS", priority: "high" });
+const t2 = (0, task_service_1.createTask)({ title: "Configurar Express", priority: "medium" });
+const myTasks = [t1, t2];
+console.log("Tareas Iniciales:", myTasks);
+console.log("Ordenadas por título:", (0, task_service_1.sortBy)(myTasks, "title"));
+console.log("Estadísticas:", (0, task_service_1.getStats)(myTasks));
+const t1Completed = (0, task_service_1.toggleTask)(t1);
+console.log("Tarea 1 completada:", t1Completed);

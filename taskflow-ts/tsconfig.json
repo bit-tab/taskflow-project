@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    /* Configuración de Proyecto */
+    "target": "ES2020",                                  /* Versión de JS de salida */
+    "module": "commonjs",                                /* Sistema de módulos para Node.js */
+    "rootDir": "./src",                                  /* Dónde están tus archivos .ts */
+    "outDir": "./dist",                                  /* Dónde se guardará el JS compilado */
+    "esModuleInterop": true,                             /* Facilita importaciones de librerías JS */
+    "forceConsistentCasingInFileNames": true,            /* Evita problemas entre Windows/Mac/Linux */
+
+    /* Configuración Estricta (Paso 1 de tu Tarea) */
+    "strict": true,                                      /* Activa todas las comprobaciones */
+    "noImplicitAny": true,                               /* Error si un tipo es 'any' sin querer */
+    "strictNullChecks": true,                            /* Evita errores de 'null' o 'undefined' */
+    "strictFunctionTypes": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+
+    /* Extras útiles */
+    "skipLibCheck": true,                                /* No revisa errores en node_modules */
+    "resolveJsonModule": true                            /* Permite importar archivos .json */
+  },
+  "include": ["src/**/*"],                               /* Incluye todo lo que esté en src */
+  "exclude": ["node_modules", "dist"]                    /* Ignora estas carpetas */
+}
