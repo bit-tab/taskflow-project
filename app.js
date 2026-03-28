@@ -1,3 +1,4 @@
+// --- SELECTORES ---
 const taskForm = document.getElementById('taskForm');
 const taskInput = document.getElementById('taskInput');
 const taskList = document.getElementById('taskList');
@@ -5,50 +6,52 @@ const themeToggle = document.getElementById('themeToggle');
 const themeIcon = document.getElementById('themeIcon');
 const taskCounterAside = document.getElementById('taskCounterAside');
 const taskCounterSearch = document.getElementById('taskCounterSearch');
-const searchInput = document.getElementById('searchInput'); // Nuevo
-const searchButton = document.getElementById('searchButton');
+const searchInput = document.getElementById('searchInput');
+const filterButtons = document.querySelectorAll('.filter-btn');
 
-const SEARCH_BUTTON_BASE =
-    'shrink-0 px-5 py-3 rounded-[1.25rem] text-white font-bold text-sm transition-all hover:shadow-lg active:scale-95 shadow-indigo-500/30';
+// --- ESTADO DE LA APP ---
+let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+let currentFilter = 'all'; // 'all' | 'pending' | 'completed'
 
-function getQuery() {
-    return searchInput ? searchInput.value.trim() : '';
-}
-
-// --- MODO OSCURO (Se mantiene igual) ---
-if (themeToggle && themeIcon) {
-    themeToggle.addEventListener('click', () => {
-        document.documentElement.classList.toggle('dark');
-        const isDark = document.documentElement.classList.contains('dark');
-        themeIcon.innerText = isDark ? '☀️' : '🌙';
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    });
-
-    if (localStorage.getItem('theme') === 'dark') {
+// --- MODO OSCURO ---
+const initTheme = () => {
+    if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
-        themeIcon.innerText = '☀️';
+        if (themeIcon) themeIcon.innerText = '☀️';
     }
-}
+};
 
-// --- GESTIÓN DE TAREAS ---
-let tasks = [];
-try {
-    const raw = localStorage.getItem('tasks');
-    if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-            // Solo aceptamos elementos string para que el filtrado no reviente
-            tasks = parsed.filter(t => typeof t === 'string');
-        }
-    }
-} catch (err) {
-    // Si hay datos corruptos, empezamos limpio
-    tasks = [];
-}
+themeToggle?.addEventListener('click', () => {
+    document.documentElement.classList.toggle('dark');
+    const isDark = document.documentElement.classList.contains('dark');
+    if (themeIcon) themeIcon.innerText = isDark ? '☀️' : '🌙';
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+});
 
-function renderTasks(filter = '') {
+// --- FUNCIONALIDADES CORE ---
+
+// 1. Guardar en LocalStorage
+const saveToLocalStorage = () => {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+};
+
+// 2. Renderizado con Filtros y Búsqueda
+function renderTasks() {
     if (!taskList) return;
     taskList.innerHTML = '';
+    
+    const query = searchInput.value.toLowerCase();
+
+    // Lógica de filtrado combinada (Buscador + Botones de estado)
+    const filteredTasks = tasks.filter(t => {
+        const matchesSearch = t.text.toLowerCase().includes(query);
+        const matchesFilter = 
+            currentFilter === 'all' ? true :
+            currentFilter === 'pending' ? !t.completed :
+            t.completed;
+        return matchesSearch && matchesFilter;
+    });
+
     const colors = [
         'bg-blue-100 border-blue-300 dark:bg-blue-900/30',
         'bg-purple-100 border-purple-300 dark:bg-purple-900/30',
@@ -56,103 +59,91 @@ function renderTasks(filter = '') {
         'bg-emerald-100 border-emerald-300 dark:bg-emerald-900/30'
     ];
 
-    // Aplicamos el filtro del buscador
-    const query = filter.toLowerCase();
-    const filteredTasks = tasks
-        .map((t, index) => ({ task: String(t), index }))
-        .filter(({ task }) => task.toLowerCase().includes(query));
-
-    filteredTasks.forEach(({ task, index: originalIndex }, renderIndex) => {
-        const colorClass = colors[renderIndex % colors.length];
+    filteredTasks.forEach((t, index) => {
+        const colorClass = colors[index % colors.length];
+        const isCompleted = t.completed ? 'opacity-50 line-through' : '';
+        
         const div = document.createElement('div');
-        div.className = `flex justify-between items-center p-6 rounded-[2rem] border-2 shadow-sm ${colorClass}`;
+        div.className = `flex justify-between items-center p-5 rounded-[2rem] border-2 transition-all shadow-sm ${colorClass} ${isCompleted}`;
         
         div.innerHTML = `
-            <span class="text-lg font-medium dark:text-slate-200">${task}</span>
-            <button onclick="deleteTask(${originalIndex})" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/50 hover:bg-red-500 hover:text-white transition-all text-red-500 shadow-sm">
-                ✕
-            </button>
+            <div class="flex items-center gap-4 flex-1">
+                <input type="checkbox" ${t.completed ? 'checked' : ''} 
+                    onclick="toggleTask('${t.id}')" 
+                    class="w-6 h-6 rounded-full border-2 border-indigo-500 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                <span class="text-lg font-medium dark:text-slate-200 cursor-pointer" onclick="editarTarea('${t.id}')">${t.text}</span>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="editarTarea('${t.id}')" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/50 hover:bg-indigo-500 hover:text-white transition-all text-indigo-500">
+                    ✏️
+                </button>
+                <button onclick="deleteTask('${t.id}')" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/50 hover:bg-red-500 hover:text-white transition-all text-red-500">
+                    ✕
+                </button>
+            </div>
         `;
         taskList.appendChild(div);
     });
 
-    // Contador de tareas pendientes (lado izquierdo)
-    if (taskCounterAside) {
-        taskCounterAside.innerText = `Tienes ${tasks.length} tareas pendientes`;
+    // Actualizar contadores
+    const pendingCount = tasks.filter(t => !t.completed).length;
+    if (taskCounterAside) taskCounterAside.innerText = `Tienes ${pendingCount} tareas pendientes`;
+    if (taskCounterSearch) taskCounterSearch.innerText = `Mostrando ${filteredTasks.length} tareas`;
+    
+    saveToLocalStorage();
+}
+
+// 3. Event Listeners para Búsqueda y Filtros
+searchInput?.addEventListener('input', renderTasks);
+
+filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Estilo visual de botones
+        filterButtons.forEach(b => b.classList.remove('bg-white', 'dark:bg-slate-600', 'shadow-sm'));
+        btn.classList.add('bg-white', 'dark:bg-slate-600', 'shadow-sm');
+        
+        currentFilter = btn.dataset.filter;
+        renderTasks();
+    });
+});
+
+// 4. CRUD de Tareas
+taskForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = taskInput.value.trim();
+    if (text) {
+        tasks.push({
+            id: Date.now().toString(),
+            text,
+            completed: false
+        });
+        taskInput.value = '';
+        renderTasks();
     }
-    // Contador de tareas filtradas (lado derecho)
-    if (taskCounterSearch) {
-        taskCounterSearch.innerText = `Tareas encontradas: ${filteredTasks.length}`;
-    }
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-}
+});
 
-// Evento para el buscador
-if (searchInput && searchButton) {
-    searchInput.addEventListener('input', (e) => {
-        renderTasks(e.target.value);
-        updateSearchButton();
-    });
-}
-
-function updateSearchButton() {
-    if (!searchInput || !searchButton) return;
-    const hasQuery = getQuery().length > 0;
-
-    const bgClass = hasQuery
-        ? 'bg-rose-600 hover:bg-rose-700'
-        : 'bg-indigo-600 hover:bg-indigo-700';
-
-    searchButton.className = `${SEARCH_BUTTON_BASE} ${bgClass}`;
-    searchButton.innerHTML = hasQuery
-        ? '<span aria-hidden="true">✕</span> Limpiar'
-        : '<span aria-hidden="true">🔍</span> Buscar';
-}
-
-if (searchInput && searchButton) {
-    searchButton.addEventListener('click', () => {
-        const query = getQuery();
-        if (query.length > 0) {
-            // Limpiamos el input para volver a mostrar todas las tareas.
-            searchInput.value = '';
-            renderTasks('');
-            updateSearchButton();
-        } else {
-            renderTasks(query);
-        }
-    });
-
-    updateSearchButton();
-}
-
-if (taskForm && taskInput) {
-    taskForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const value = taskInput.value.trim();
-        if (value) {
-            tasks.push(value);
-            taskInput.value = '';
-            renderTasks();
-        }
-    });
-}
-
-window.deleteTask = (index) => {
-    tasks.splice(index, 1);
+window.toggleTask = (id) => {
+    tasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
     renderTasks();
 };
 
-
-//funcion para filtrar las tareas completadas
-function filterCompletedTasks() {
-    tasks = tasks.filter(task => !task.completed);
+window.deleteTask = (id) => {
+    tasks = tasks.filter(t => t.id !== id);
     renderTasks();
-}
+};
 
-//funcion para filtrar las tareas pendientes
-function filterPendingTasks() {
-    tasks = tasks.filter(task => !task.completed);
-    renderTasks();
-}
+// 5. Función Editar Tarea (Prompt)
+window.editarTarea = (id) => {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    
+    const nuevoTexto = prompt("Edita tu tarea:", task.text);
+    if (nuevoTexto !== null && nuevoTexto.trim() !== "") {
+        task.text = nuevoTexto.trim();
+        renderTasks();
+    }
+};
 
+// Inicializar
+initTheme();
 renderTasks();
