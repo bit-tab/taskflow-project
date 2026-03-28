@@ -3,47 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskFlow | Workspace Dinámico</title>
+    <title>TaskFlow | Tu Espacio Profesional</title>
     <link href="./output.css" rel="stylesheet">
     <link href="./style.css" rel="stylesheet">
 </head>
-<body class="bg-indigo-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-500">
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-300">
 
-    <header class="sticky top-0 z-50 w-full glass-card p-4 md:p-6 flex justify-between items-center">
-        <h1 class="text-2xl md:text-3xl font-black bg-gradient-to-r from-pink-500 to-indigo-600 bg-clip-text text-transparent">TaskFlow</h1>
-        
-        <div class="hidden md:flex gap-4 text-[10px] font-bold uppercase">
-            <span class="flex items-center gap-1 text-amber-500">⏳ Pendiente</span>
-            <span class="flex items-center gap-1 text-blue-500">🔄 En Proceso</span>
-            <span class="flex items-center gap-1 text-emerald-500">✅ Hecho</span>
+    <header class="sticky top-0 z-50 w-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 p-4 shadow-sm">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-6">
+                <h1 class="text-2xl font-black bg-gradient-to-r from-indigo-600 to-pink-500 bg-clip-text text-transparent">TaskFlow</h1>
+                <div class="hidden sm:flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider opacity-60">
+                    <span class="flex items-center gap-1"><i class="w-2 h-2 rounded-full bg-amber-400"></i> Pendiente</span>
+                    <span class="flex items-center gap-1"><i class="w-2 h-2 rounded-full bg-blue-500"></i> Proceso</span>
+                    <span class="flex items-center gap-1"><i class="w-2 h-2 rounded-full bg-emerald-500"></i> Hecho</span>
+                </div>
+            </div>
+            
+            <button id="themeToggle" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:scale-105 transition-all">
+                <span id="themeIcon" class="text-xl">🌙</span>
+            </button>
         </div>
-
-        <button id="themeToggle" class="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-indigo-100 dark:bg-slate-700 flex items-center justify-center shadow-inner text-xl">
-            <span id="themeIcon">🌙</span>
-        </button>
     </header>
 
-    <main class="container mx-auto px-4 py-8">
-        <section class="text-center mb-12">
-            <h2 class="text-3xl md:text-5xl font-extrabold mb-2">¡Bienvenido a tu Espacio! 🚀</h2>
-            <p class="text-slate-500 dark:text-slate-400">Crea listas, organiza categorías y gestiona tus tareas con un clic.</p>
+    <main class="container mx-auto px-4 py-10 max-w-6xl">
+        <section id="welcomeSection" class="text-center mb-12 animate-in fade-in duration-700">
+            <h2 class="text-4xl font-black mb-4">¡Hola! Organiza tu día 🚀</h2>
+            <p class="text-slate-500 dark:text-slate-400 mb-8 italic">"Crea una lista con tu nombre para empezar a ver la magia."</p>
+            
+            <form id="newListForm" class="max-w-lg mx-auto flex gap-2 p-2 bg-white dark:bg-slate-800 rounded-3xl shadow-xl">
+                <input type="text" id="newListInput" placeholder="Nombre de tu nueva lista..." required
+                    class="flex-1 p-4 rounded-2xl bg-transparent outline-none dark:text-white">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-8 rounded-2xl transition-all">
+                    Crear Lista
+                </button>
+            </form>
         </section>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <aside class="lg:col-span-3 space-y-4">
-                <div class="glass-card p-6 rounded-[2rem]">
-                    <h3 class="font-bold mb-4">Nueva Lista Maestra</h3>
-                    <input type="text" id="newListInput" placeholder="Ej: Mi Trabajo" 
-                        class="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border-none focus:ring-2 focus:ring-pink-500 outline-none mb-3">
-                    <button onclick="createList()" class="w-full py-3 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-pink-200 dark:shadow-none">
-                        + Crear Lista
-                    </button>
-                </div>
-            </aside>
-
-            <div id="workspace" class="lg:col-span-9 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                </div>
-        </div>
+        <div id="workspace" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            </div>
     </main>
 
     <script src="./app.js"></script>
