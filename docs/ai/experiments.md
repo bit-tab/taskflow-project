@@ -41,3 +41,9 @@ Experimento: Programación Tradicional vs. IA (Cursor)
 ## Conclusión Final
 sin ia requiere mucho tiempo porque tambien hay tiempo de leer documentacion investigar funciones etc
 con ia es poner el prompt y en 3-5 mins está listo, pero el nivel de aprendizaje es menor.
+
+
+PROCESO CON MCP
+para instalar mcp he seguido las indicaciones de crear el archivo mcp.json.
+no he podido probarlo porque no me he suscrito a cursor y de forma gratuita ya no hace nada. 
+por lo que he investigado, mcp puede ser útil en proyectos de gran embergadura, donde en luhgar de tener que proporcionarle a la ia mil archivoa a la vez, ella ouede ir viendo lo que necesita(siempre y cuando tenga tu permiso).
