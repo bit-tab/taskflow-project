@@ -3,14 +3,15 @@
 @tailwind utilities;
 
 :root {
-    --bg-light: #fdf2f8; /* Un rosa pastel muy suave */
+    --bg-light: #fdf2f8; /* Rosa pastel suave */
     --card-light: #ffffff;
     --text-light: #1e293b;
 }
 
 .dark {
-    --bg-light: #070a13; /* Azul casi negro OLED */
-    --card-light: #111827;
+    /* Fondo OLED profundo, pero NO negro puro, un azul-negro muy oscuro */
+    --bg-light: #070a13; 
+    --card-light: #0d121f; /* Tarjetas ligeramente más claras */
     --text-light: #f1f5f9;
 }
 
@@ -23,12 +24,45 @@ body {
 
 .glass-card {
     background: var(--card-light);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.05); /* Borde casi invisible */
     box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
     border-radius: 2.5rem;
 }
 
-/* Colores pastel para las tarjetas de tareas */
+/* --- CLASE DE INTEGRACIÓN PREMIUM PARA EL FORMULARIO (FIX) --- */
+.integrated-form {
+    /* En modo día es blanco puro, pero en modo oscuro es un gris-azul profundo */
+    @apply bg-white dark:bg-[#0d121f] rounded-[2.5rem] p-2 flex gap-2 shadow-2xl transition-all duration-300;
+    
+    /* Borde fino y sutil que brilla en modo oscuro */
+    @apply border border-slate-100 dark:border-indigo-500/20;
+    
+    /* Pequeño resplandor (glow) en modo oscuro para integrarlo con el fondo */
+    @apply hover:shadow-indigo-500/10 hover:border-indigo-500/30;
+}
+
+/* Colores pastel para las tareas */
 .task-pendiente { @apply bg-orange-50 border-orange-200 text-orange-700 dark:bg-orange-900/20 dark:border-orange-800 dark:text-orange-300; }
 .task-proceso { @apply bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300; }
 .task-hecho { @apply bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-300 opacity-60; }
+/* ... (tus estilos anteriores de :root y .dark) ... */
+
+/* FIX: Integración visual del formulario */
+.integrated-form {
+    @apply flex gap-2 p-2 rounded-[2.5rem] shadow-2xl transition-all duration-300 border;
+    /* En modo claro: blanco con borde suave */
+    @apply bg-white border-indigo-100;
+    /* En modo oscuro: color casi igual al fondo para que no parezca pegado */
+    @apply dark:bg-[#0d121f] dark:border-indigo-500/20;
+}
+
+/* FIX: Leyenda siempre pegada al fondo */
+footer {
+    @apply fixed bottom-0 left-0 w-full flex justify-center pb-8 pt-4 z-[100];
+    /* Degradado sutil detrás de la leyenda para que no choque con las listas */
+    background: linear-gradient(to top, var(--bg-light) 60%, transparent);
+}
+
+.legend-container {
+    @apply glass-card px-8 py-4 flex gap-8 items-center border border-indigo-100 dark:border-slate-800 shadow-2xl;
+}

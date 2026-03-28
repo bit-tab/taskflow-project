@@ -21,10 +21,10 @@
             <h2 class="text-4xl font-extrabold mb-4">¡Tu caos, bajo control! ✨</h2>
             <p class="text-slate-500 dark:text-slate-400 mb-8 font-medium">Elige un nombre para tu proyecto y comienza a organizar tus tareas</p>
             
-            <form id="newListForm" class="flex gap-2 p-2 bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-indigo-100 dark:border-slate-800">
+            <form id="newListForm" class="integrated-form">
                 <input type="text" id="newListInput" placeholder="Nombre de tu proyecto..." required
-                    class="flex-1 p-4 bg-transparent outline-none font-bold text-lg">
-                <button type="submit" class="bg-indigo-600 text-white font-bold px-10 rounded-[2rem] hover:bg-indigo-700 transition-all">
+                    class="flex-1 p-4 bg-transparent outline-none font-bold text-lg text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500">
+                <button type="submit" class="bg-indigo-600 text-white font-bold px-10 rounded-[2rem] hover:bg-indigo-700 transition-all active:scale-95 shadow-lg shadow-indigo-500/20">
                     CREAR
                 </button>
             </form>
@@ -39,8 +39,8 @@
             </div>
     </main>
 
-    <footer class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-        <div class="glass-card px-8 py-4 flex gap-8 items-center border border-indigo-100 dark:border-slate-800">
+    <footer>
+        <div class="legend-container">
             <div class="flex items-center gap-2 text-xs font-bold text-orange-500"><span>⏳</span> PENDIENTE</div>
             <div class="flex items-center gap-2 text-xs font-bold text-blue-500"><span>🔄</span> PROCESO</div>
             <div class="flex items-center gap-2 text-xs font-bold text-emerald-500"><span>✅</span> HECHO</div>
