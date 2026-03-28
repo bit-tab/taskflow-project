@@ -2,7 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Opcional: Para que las nubes se sientan más como nubes */
-.task-card {
-    border-radius: 50px;
+@layer components {
+    .glass-card {
+        @apply bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-white/20 dark:border-slate-700/50 shadow-xl;
+    }
+    
+    .status-badge {
+        @apply text-[10px] uppercase tracking-widest font-black px-2 py-1 rounded-md;
+    }
+}
+
+/* Animación de entrada para las nubes */
+.task-cloud {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.task-cloud:hover {
+    transform: translateY(-5px) scale(1.02);
 }
