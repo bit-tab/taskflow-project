@@ -2,21 +2,64 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --bg-main: #f1f5f9;
+    --card-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+    --font-main: 'Inter', system-ui, sans-serif;
+  }
+
+  .dark {
+    --bg-main: #05070a;
+    --card-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5);
+  }
+
+  body {
+    font-family: var(--font-main);
+    background-color: var(--bg-main);
+    @apply transition-colors duration-500;
+  }
+}
+
 @layer components {
-    .glass-card {
-        @apply bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-white/20 dark:border-slate-700/50 shadow-xl;
-    }
-    
-    .status-badge {
-        @apply text-[10px] uppercase tracking-widest font-black px-2 py-1 rounded-md;
-    }
+  /* Estilo "Nube" para las tarjetas */
+  .glass-card {
+    @apply bg-white/90 dark:bg-[#0f141e] backdrop-blur-md 
+           border border-white/40 dark:border-slate-800
+           rounded-[2.5rem] shadow-soft transition-all duration-300;
+  }
+
+  /* El Input de "Proyecto" con estilo Premium */
+  #newListInput {
+    @apply text-lg focus:ring-0 placeholder:text-slate-400 dark:placeholder:text-slate-600;
+  }
+
+  /* Botones con micro-interacciones */
+  .btn-primary {
+    @apply bg-gradient-to-r from-indigo-600 to-purple-600 
+           hover:from-indigo-500 hover:to-purple-500
+           text-white font-black tracking-tight
+           transform active:scale-95 transition-all;
+  }
+
+  /* Animación para las tareas */
+  .task-item {
+    @apply transition-all duration-300 hover:translate-x-1 hover:shadow-md;
+  }
 }
 
-/* Animación de entrada para las nubes */
-.task-cloud {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Scrollbar personalizado para que no sea el de Windows feo */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 dark:bg-slate-700 rounded-full;
 }
 
-.task-cloud:hover {
-    transform: translateY(-5px) scale(1.02);
+/* Efecto de foco para accesibilidad */
+*:focus-visible {
+  @apply outline-none ring-4 ring-indigo-500/50;
 }
