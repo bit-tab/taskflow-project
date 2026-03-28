@@ -1,3 +1,4 @@
+import { errorHandler } from './middleware/error.middleware';
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -11,6 +12,7 @@ const PORT = process.env.PORT || 3000;
 // Middlewares
 app.use(cors());
 app.use(express.json());
+app.use('/api/tasks', taskRoutes);
 
 // Logger personalizado (Punto 2 de tu lista)
 app.use((req, res, next) => {
@@ -35,4 +37,9 @@ app.listen(PORT, () => {
   ✅ Servidor listo en: http://localhost:${PORT}
   📂 Rutas de tareas en: http://localhost:${PORT}/api/tasks
   `);
+});
+app.use(errorHandler);
+
+app.listen(PORT, () => {
+  console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
 });
