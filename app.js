@@ -1,8 +1,34 @@
-let data = JSON.parse(localStorage.getItem('taskflow_v4')) || [];
+// --- ESTADO Y PERSISTENCIA ---
+let data = JSON.parse(localStorage.getItem('taskflow_v5')) || [];
 
-const save = () => localStorage.setItem('taskflow_v4', JSON.stringify(data));
+const save = () => localStorage.setItem('taskflow_v5', JSON.stringify(data));
 
-// --- CREACIÓN ---
+// --- CORRECCIÓN MODO OSCURO ---
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+
+const applyTheme = (theme) => {
+    if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+        themeIcon.innerText = '☀️';
+    } else {
+        document.documentElement.classList.remove('dark');
+        themeIcon.innerText = '🌙';
+    }
+};
+
+themeToggle.addEventListener('click', () => {
+    const isDark = document.documentElement.classList.toggle('dark');
+    const theme = isDark ? 'dark' : 'light';
+    localStorage.setItem('theme', theme);
+    themeIcon.innerText = isDark ? '☀️' : '🌙';
+});
+
+// Aplicar tema al cargar
+applyTheme(localStorage.getItem('theme') || 'light');
+
+// --- LÓGICA DE NEGOCIO ---
+
 window.createList = () => {
     const input = document.getElementById('newListInput');
     if (!input.value.trim()) return;
@@ -10,17 +36,20 @@ window.createList = () => {
         id: Date.now().toString(),
         name: input.value.trim(),
         categories: [],
-        mainTasks: [] // Tareas sin categoría
+        standaloneTasks: []
     });
     input.value = '';
     render();
 };
 
 window.addCategory = (listId) => {
-    const name = prompt("Nombre de la categoría (Hogar, Trabajo, etc):");
+    const name = prompt("Nombre de la categoría:");
     if (!name) return;
-    const list = data.find(l => l.id === listId);
-    list.categories.push({ id: Date.now().toString(), name, tasks: [] });
+    data.find(l => l.id === listId).categories.push({
+        id: Date.now().toString(),
+        name,
+        tasks: []
+    });
     render();
 };
 
@@ -28,28 +57,23 @@ window.addTask = (listId, catId = null) => {
     const text = prompt("¿Qué hay que hacer?");
     if (!text) return;
     const list = data.find(l => l.id === listId);
-    
     const newTask = { id: Date.now().toString(), text, status: 'pendiente' };
     
     if (catId) {
-        const cat = list.categories.find(c => c.id === catId);
-        cat.tasks.push(newTask);
+        list.categories.find(c => c.id === catId).tasks.push(newTask);
     } else {
-        list.mainTasks.push(newTask);
+        list.standaloneTasks.push(newTask);
     }
     render();
 };
 
-// --- CICLO DE ESTADOS ---
-window.nextStatus = (listId, catId, taskId) => {
+window.cycleStatus = (listId, catId, taskId) => {
     const list = data.find(l => l.id === listId);
     let task;
-    
     if (catId) {
-        const cat = list.categories.find(c => c.id === catId);
-        task = cat.tasks.find(t => t.id === taskId);
+        task = list.categories.find(c => c.id === catId).tasks.find(t => t.id === taskId);
     } else {
-        task = list.mainTasks.find(t => t.id === taskId);
+        task = list.standaloneTasks.find(t => t.id === taskId);
     }
     
     const states = ['pendiente', 'proceso', 'completado'];
@@ -57,69 +81,69 @@ window.nextStatus = (listId, catId, taskId) => {
     render();
 };
 
-// --- RENDERIZADO VISUAL ---
+window.deleteList = (id) => {
+    if(confirm("¿Borrar lista completa?")) {
+        data = data.filter(l => l.id !== id);
+        render();
+    }
+};
+
+// --- RENDERIZADO ---
 const render = () => {
     const workspace = document.getElementById('workspace');
-    if (data.length === 0) {
-        workspace.innerHTML = `
-            <div class="text-center p-20 border-4 border-dashed border-slate-200 dark:border-slate-800 rounded-[3rem]">
-                <span class="text-6xl">✨</span>
-                <p class="mt-4 text-slate-400 font-medium">No tienes listas aún. Crea una a la izquierda para empezar.</p>
-            </div>`;
-        return;
-    }
+    workspace.innerHTML = '';
 
-    workspace.innerHTML = data.map(list => `
-        <div class="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div class="flex justify-between items-end border-b-2 border-slate-100 dark:border-slate-800 pb-4">
-                <h2 class="text-4xl font-black italic text-slate-800 dark:text-white">${list.name}</h2>
-                <div class="flex gap-2">
-                    <button onclick="addTask('${list.id}')" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-xl font-bold text-sm">+ Tarea Libre</button>
-                    <button onclick="addCategory('${list.id}')" class="px-4 py-2 bg-indigo-500 text-white rounded-xl font-bold text-sm">+ Categoría</button>
-                </div>
+    data.forEach(list => {
+        const listCard = document.createElement('div');
+        listCard.className = "glass-card rounded-[2.5rem] p-6 flex flex-col gap-4 animate-in zoom-in-95 duration-300";
+        
+        listCard.innerHTML = `
+            <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-4">
+                <h2 class="text-xl font-black text-indigo-600 dark:text-indigo-400 truncate">${list.name}</h2>
+                <button onclick="deleteList('${list.id}')" class="text-xs opacity-30 hover:opacity-100 hover:text-red-500">Eliminar</button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                
-                ${list.mainTasks.length > 0 ? `
-                    <div class="col-span-full bg-white/50 dark:bg-slate-800/50 p-6 rounded-[2rem] border border-white dark:border-slate-700">
-                        <h3 class="text-xs font-black uppercase tracking-[0.2em] text-indigo-400 mb-4">Tareas Generales</h3>
-                        <div class="flex flex-wrap gap-4">
-                            ${list.mainTasks.map(t => renderTaskCard(list.id, null, t)).join('')}
-                        </div>
-                    </div>
-                ` : ''}
+            <div class="flex gap-2 mb-2">
+                <button onclick="addTask('${list.id}')" class="flex-1 py-2 text-xs font-bold bg-indigo-500 text-white rounded-xl">+ Tarea</button>
+                <button onclick="addCategory('${list.id}')" class="flex-1 py-2 text-xs font-bold bg-slate-200 dark:bg-slate-700 rounded-xl">+ Cat</button>
+            </div>
 
+            <div class="space-y-2">
+                ${list.standaloneTasks.map(t => renderTask(list.id, null, t)).join('')}
+            </div>
+
+            <div class="space-y-4">
                 ${list.categories.map(cat => `
-                    <div class="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] shadow-lg border border-slate-100 dark:border-slate-700">
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="font-extrabold text-xl text-purple-500">${cat.name}</h3>
-                            <button onclick="addTask('${list.id}', '${cat.id}')" class="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 flex items-center justify-center font-bold">+</button>
+                    <div class="bg-indigo-50/50 dark:bg-slate-900/50 p-4 rounded-2xl border border-indigo-100 dark:border-slate-800">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-[10px] font-black uppercase tracking-tighter text-indigo-400">${cat.name}</span>
+                            <button onclick="addTask('${list.id}', '${cat.id}')" class="text-indigo-500 font-bold">+</button>
                         </div>
-                        <div class="space-y-3">
-                            ${cat.tasks.map(t => renderTaskCard(list.id, cat.id, t)).join('')}
+                        <div class="space-y-2">
+                            ${cat.tasks.map(t => renderTask(list.id, cat.id, t)).join('')}
                         </div>
                     </div>
                 `).join('')}
             </div>
-        </div>
-    `).join('');
+        `;
+        workspace.appendChild(listCard);
+    });
     save();
 };
 
-const renderTaskCard = (listId, catId, t) => {
-    const themes = {
-        pendiente: 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700',
-        proceso: 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300',
-        completado: 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/30 text-emerald-600 dark:text-emerald-500 opacity-60'
+const renderTask = (lId, cId, t) => {
+    const styles = {
+        pendiente: 'bg-white dark:bg-slate-800 border-amber-300 text-amber-700 dark:text-amber-400',
+        proceso: 'bg-blue-50 dark:bg-blue-900/30 border-blue-400 text-blue-700 dark:text-blue-300',
+        completado: 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500 text-emerald-700 dark:text-emerald-400 opacity-60'
     };
-    const icons = { pendiente: '⭕', proceso: '🕒', completado: '✅' };
-
+    const icons = { pendiente: '⏳', proceso: '🔄', completado: '✅' };
+    
     return `
-        <div onclick="nextStatus('${listId}', ${catId ? `'${catId}'` : 'null'}, '${t.id}')" 
-            class="group p-4 rounded-2xl border-2 cursor-pointer transition-all hover:shadow-md active:scale-95 flex items-center justify-between gap-3 ${themes[t.status]}">
-            <span class="font-bold ${t.status === 'completado' ? 'line-through' : ''}">${t.text}</span>
-            <span class="text-lg">${icons[t.status]}</span>
+        <div onclick="cycleStatus('${lId}', ${cId ? `'${cId}'` : 'null'}, '${t.id}')" 
+            class="task-cloud p-3 rounded-xl border-l-4 shadow-sm cursor-pointer flex justify-between items-center text-sm font-semibold ${styles[t.status]}">
+            <span class="${t.status === 'completado' ? 'line-through' : ''}">${t.text}</span>
+            <span>${icons[t.status]}</span>
         </div>
     `;
 };
