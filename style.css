@@ -2,64 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --bg-main: #f1f5f9;
-    --card-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-    --font-main: 'Inter', system-ui, sans-serif;
-  }
-
-  .dark {
-    --bg-main: #05070a;
-    --card-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5);
-  }
-
-  body {
-    font-family: var(--font-main);
-    background-color: var(--bg-main);
-    @apply transition-colors duration-500;
-  }
+:root {
+    --bg-light: #fdf2f8; /* Un rosa pastel muy suave */
+    --card-light: #ffffff;
+    --text-light: #1e293b;
 }
 
-@layer components {
-  /* Estilo "Nube" para las tarjetas */
-  .glass-card {
-    @apply bg-white/90 dark:bg-[#0f141e] backdrop-blur-md 
-           border border-white/40 dark:border-slate-800
-           rounded-[2.5rem] shadow-soft transition-all duration-300;
-  }
-
-  /* El Input de "Proyecto" con estilo Premium */
-  #newListInput {
-    @apply text-lg focus:ring-0 placeholder:text-slate-400 dark:placeholder:text-slate-600;
-  }
-
-  /* Botones con micro-interacciones */
-  .btn-primary {
-    @apply bg-gradient-to-r from-indigo-600 to-purple-600 
-           hover:from-indigo-500 hover:to-purple-500
-           text-white font-black tracking-tight
-           transform active:scale-95 transition-all;
-  }
-
-  /* Animación para las tareas */
-  .task-item {
-    @apply transition-all duration-300 hover:translate-x-1 hover:shadow-md;
-  }
+.dark {
+    --bg-light: #070a13; /* Azul casi negro OLED */
+    --card-light: #111827;
+    --text-light: #f1f5f9;
 }
 
-/* Scrollbar personalizado para que no sea el de Windows feo */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  @apply bg-transparent;
-}
-::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+body {
+    background-color: var(--bg-light);
+    color: var(--text-light);
+    transition: all 0.4s ease;
+    font-family: 'Inter', sans-serif;
 }
 
-/* Efecto de foco para accesibilidad */
-*:focus-visible {
-  @apply outline-none ring-4 ring-indigo-500/50;
+.glass-card {
+    background: var(--card-light);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+    border-radius: 2.5rem;
 }
+
+/* Colores pastel para las tarjetas de tareas */
+.task-pendiente { @apply bg-orange-50 border-orange-200 text-orange-700 dark:bg-orange-900/20 dark:border-orange-800 dark:text-orange-300; }
+.task-proceso { @apply bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300; }
+.task-hecho { @apply bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-300 opacity-60; }
