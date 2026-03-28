@@ -142,4 +142,17 @@ window.deleteTask = (index) => {
     renderTasks();
 };
 
+
+//funcion para filtrar las tareas completadas
+function filterCompletedTasks() {
+    tasks = tasks.filter(task => !task.completed);
+    renderTasks();
+}
+
+//funcion para filtrar las tareas pendientes
+function filterPendingTasks() {
+    tasks = tasks.filter(task => !task.completed);
+    renderTasks();
+}
+
 renderTasks();
