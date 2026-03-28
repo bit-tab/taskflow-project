@@ -1,149 +1,113 @@
-// --- SELECTORES ---
-const taskForm = document.getElementById('taskForm');
-const taskInput = document.getElementById('taskInput');
-const taskList = document.getElementById('taskList');
-const themeToggle = document.getElementById('themeToggle');
-const themeIcon = document.getElementById('themeIcon');
-const taskCounterAside = document.getElementById('taskCounterAside');
-const taskCounterSearch = document.getElementById('taskCounterSearch');
-const searchInput = document.getElementById('searchInput');
-const filterButtons = document.querySelectorAll('.filter-btn');
+// --- ESTADO GLOBAL ---
+let data = JSON.parse(localStorage.getItem('taskflow_v3')) || [];
 
-// --- ESTADO DE LA APP ---
-let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-let currentFilter = 'all'; // 'all' | 'pending' | 'completed'
+/* Estructura de data: 
+[
+  { 
+    id: "123", 
+    name: "Mónica", 
+    categories: [
+      { id: "456", name: "Hogar", tasks: [{ id: "789", text: "Limpiar", status: "pendiente" }] }
+    ] 
+  }
+]
+*/
 
-// --- MODO OSCURO ---
-const initTheme = () => {
-    if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-        if (themeIcon) themeIcon.innerText = '☀️';
-    }
-};
+const save = () => localStorage.setItem('taskflow_v3', JSON.stringify(data));
 
-themeToggle?.addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-    const isDark = document.documentElement.classList.contains('dark');
-    if (themeIcon) themeIcon.innerText = isDark ? '☀️' : '🌙';
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-});
+// --- FUNCIONES DE CREACIÓN ---
 
-// --- FUNCIONALIDADES CORE ---
-
-// 1. Guardar en LocalStorage
-const saveToLocalStorage = () => {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-};
-
-// 2. Renderizado con Filtros y Búsqueda
-function renderTasks() {
-    if (!taskList) return;
-    taskList.innerHTML = '';
-    
-    const query = searchInput.value.toLowerCase();
-
-    // Lógica de filtrado combinada (Buscador + Botones de estado)
-    const filteredTasks = tasks.filter(t => {
-        const matchesSearch = t.text.toLowerCase().includes(query);
-        const matchesFilter = 
-            currentFilter === 'all' ? true :
-            currentFilter === 'pending' ? !t.completed :
-            t.completed;
-        return matchesSearch && matchesFilter;
+window.createList = () => {
+    const input = document.getElementById('newListInput');
+    if (!input.value.trim()) return;
+    data.push({
+        id: Date.now().toString(),
+        name: input.value.trim(),
+        categories: []
     });
+    input.value = '';
+    render();
+};
 
-    const colors = [
-        'bg-blue-100 border-blue-300 dark:bg-blue-900/30',
-        'bg-purple-100 border-purple-300 dark:bg-purple-900/30',
-        'bg-pink-100 border-pink-300 dark:bg-pink-900/30',
-        'bg-emerald-100 border-emerald-300 dark:bg-emerald-900/30'
-    ];
+window.addCategory = (listId) => {
+    const name = prompt("Nombre de la nueva categoría:");
+    if (!name) return;
+    const list = data.find(l => l.id === listId);
+    list.categories.push({ id: Date.now().toString(), name, tasks: [] });
+    render();
+};
 
-    filteredTasks.forEach((t, index) => {
-        const colorClass = colors[index % colors.length];
-        const isCompleted = t.completed ? 'opacity-50 line-through' : '';
+window.addTask = (listId, catId) => {
+    const text = prompt("Nueva tarea:");
+    if (!text) return;
+    const list = data.find(l => l.id === listId);
+    const cat = list.categories.find(c => c.id === catId);
+    cat.tasks.push({ id: Date.now().toString(), text, status: 'pendiente' });
+    render();
+};
+
+// --- LÓGICA DE ESTADOS (Clic para avanzar) ---
+window.nextStatus = (listId, catId, taskId) => {
+    const list = data.find(l => l.id === listId);
+    const cat = list.categories.find(c => c.id === catId);
+    const task = cat.tasks.find(t => t.id === taskId);
+    
+    const states = ['pendiente', 'proceso', 'completado'];
+    let currentIndex = states.indexOf(task.status);
+    task.status = states[(currentIndex + 1) % states.length];
+    render();
+};
+
+// --- RENDERIZADO RESPONSIVO ---
+const render = () => {
+    const workspace = document.getElementById('workspace');
+    workspace.innerHTML = '';
+
+    data.forEach(list => {
+        const listEl = document.createElement('div');
+        listEl.className = "bg-white dark:bg-slate-800 rounded-[2.5rem] p-6 shadow-2xl border border-slate-200 dark:border-slate-700";
         
-        const div = document.createElement('div');
-        div.className = `flex justify-between items-center p-5 rounded-[2rem] border-2 transition-all shadow-sm ${colorClass} ${isCompleted}`;
-        
-        div.innerHTML = `
-            <div class="flex items-center gap-4 flex-1">
-                <input type="checkbox" ${t.completed ? 'checked' : ''} 
-                    onclick="toggleTask('${t.id}')" 
-                    class="w-6 h-6 rounded-full border-2 border-indigo-500 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
-                <span class="text-lg font-medium dark:text-slate-200 cursor-pointer" onclick="editarTarea('${t.id}')">${t.text}</span>
+        listEl.innerHTML = `
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-black text-indigo-600">${list.name}</h2>
+                <button onclick="addCategory('${list.id}')" class="text-sm bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 p-3 rounded-xl font-bold hover:scale-105 transition-all">
+                    + Añadir Categoría
+                </button>
             </div>
-            <div class="flex gap-2">
-                <button onclick="editarTarea('${t.id}')" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/50 hover:bg-indigo-500 hover:text-white transition-all text-indigo-500">
-                    ✏️
-                </button>
-                <button onclick="deleteTask('${t.id}')" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/50 hover:bg-red-500 hover:text-white transition-all text-red-500">
-                    ✕
-                </button>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                ${list.categories.map(cat => `
+                    <div class="bg-slate-50 dark:bg-slate-700/30 p-5 rounded-3xl border border-slate-200 dark:border-slate-600">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg uppercase tracking-wider text-slate-500">${cat.name}</h3>
+                            <button onclick="addTask('${list.id}', '${cat.id}')" class="text-indigo-500 font-bold text-xl">+</button>
+                        </div>
+                        <div class="space-y-3">
+                            ${cat.tasks.map(task => {
+                                const statusColors = {
+                                    pendiente: 'bg-white dark:bg-slate-800 border-l-4 border-amber-400',
+                                    proceso: 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500',
+                                    completado: 'bg-emerald-50 dark:bg-emerald-900/20 border-l-4 border-emerald-500 opacity-60'
+                                };
+                                const icon = task.status === 'pendiente' ? '⏳' : task.status === 'proceso' ? '🔄' : '✅';
+                                
+                                return `
+                                    <div onclick="nextStatus('${list.id}', '${cat.id}', '${task.id}')" 
+                                        class="p-4 rounded-xl shadow-sm cursor-pointer hover:scale-[1.02] transition-all flex items-center justify-between ${statusColors[task.status]}">
+                                        <span class="font-medium ${task.status === 'completado' ? 'line-through' : ''}">${task.text}</span>
+                                        <span>${icon}</span>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `).join('')}
             </div>
         `;
-        taskList.appendChild(div);
+        workspace.appendChild(listEl);
     });
-
-    // Actualizar contadores
-    const pendingCount = tasks.filter(t => !t.completed).length;
-    if (taskCounterAside) taskCounterAside.innerText = `Tienes ${pendingCount} tareas pendientes`;
-    if (taskCounterSearch) taskCounterSearch.innerText = `Mostrando ${filteredTasks.length} tareas`;
-    
-    saveToLocalStorage();
-}
-
-// 3. Event Listeners para Búsqueda y Filtros
-searchInput?.addEventListener('input', renderTasks);
-
-filterButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-        // Estilo visual de botones
-        filterButtons.forEach(b => b.classList.remove('bg-white', 'dark:bg-slate-600', 'shadow-sm'));
-        btn.classList.add('bg-white', 'dark:bg-slate-600', 'shadow-sm');
-        
-        currentFilter = btn.dataset.filter;
-        renderTasks();
-    });
-});
-
-// 4. CRUD de Tareas
-taskForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const text = taskInput.value.trim();
-    if (text) {
-        tasks.push({
-            id: Date.now().toString(),
-            text,
-            completed: false
-        });
-        taskInput.value = '';
-        renderTasks();
-    }
-});
-
-window.toggleTask = (id) => {
-    tasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
-    renderTasks();
+    save();
 };
 
-window.deleteTask = (id) => {
-    tasks = tasks.filter(t => t.id !== id);
-    renderTasks();
-};
-
-// 5. Función Editar Tarea (Prompt)
-window.editarTarea = (id) => {
-    const task = tasks.find(t => t.id === id);
-    if (!task) return;
-    
-    const nuevoTexto = prompt("Edita tu tarea:", task.text);
-    if (nuevoTexto !== null && nuevoTexto.trim() !== "") {
-        task.text = nuevoTexto.trim();
-        renderTasks();
-    }
-};
-
-// Inicializar
-initTheme();
-renderTasks();
+// --- INICIO ---
+render();
