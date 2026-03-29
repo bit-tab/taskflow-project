@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+/* Debajo de la importación puedes dejar tus estilos personalizados si quieres */
+body {
+  margin: 0;
+  background-color: #0f172a;
+  color: white;
+}

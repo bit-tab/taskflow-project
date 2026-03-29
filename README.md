@@ -29,3 +29,47 @@
 - Haz clic directamente sobre cualquier tarea para rotar entre sus estados. La leyenda inferior te servirá de guía visual.
 
 ---
+
+
+
+
+### 🚀 Tarea 4
+# 🚀 TaskFlow Pro - Fullstack Task Management System
+
+Desarrollamos una estructura (Frontend/Backend). El proyecto utiliza TypeScript en todo el stack para garantizar la seguridad del código y Tailwind CSS v4 para una interfaz de usuario de alto rendimiento.
+
+## 🚀 Tecnologías Core
+* **React 18**: Biblioteca principal para la interfaz.
+* **Vite**: Herramienta de construcción (bundler) ultra rápida.
+* **TypeScript**: Tipado estático para reducir errores en tiempo de ejecución.
+* **Tailwind CSS v4**: Framework de estilos de última generación.
+* **Lucide React**: Set de iconos optimizados.
+* **Axios**: Cliente HTTP para la comunicación con la API.
+
+## 🏗️ Arquitectura del Sistema
+
+La aplicación sigue el patrón de diseño **Cliente-Servidor (REST API)**:
+
+* **Frontend (Cliente):** Aplicación Single Page (SPA) desarrollada con React y Vite. Utiliza Axios para la comunicación asíncrona y Lucide-React para la iconografía.
+* **Backend (Servidor):** API REST construida con Node.js y Express. Incluye middlewares de registro de peticiones (Logger), manejo centralizado de errores y enrutamiento modular.
+
+### Estructura de Carpetas
+```text
+taskflow-project/
+├── client/                # React + Vite + TypeScript
+│   ├── src/
+│   │   ├── lib/api.ts     # Cliente Axios y lógica de comunicación
+│   │   ├── App.tsx        # Lógica de negocio y UI principal
+│   │   └── index.css      # Directivas de Tailwind CSS v4
+├── server/                # Node.js + Express + TypeScript
+│   ├── src/
+│   │   ├── routes/        # Definición de rutas (Endpoints)
+│   │   ├── middleware/    # Logs y gestión de errores
+│   │   └── index.ts       # Configuración global del servidor
+└── README.md              # Documentación técnica
+
+---
+
+# 🛠️ Instrucciones de Instalación
+
+##La aplicación será accesible en: http://localhost:5173
