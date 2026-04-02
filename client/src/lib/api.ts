@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+// Al usar una URL relativa '/api', Axios entenderá que debe 
+// buscar en el mismo dominio donde está alojada la web.
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api'
+  baseURL: '/api'
 });
 
 export const taskApi = {

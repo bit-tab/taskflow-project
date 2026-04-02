@@ -7,7 +7,6 @@ import { errorHandler } from './middleware/error.middleware';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 // 1. Middlewares
 app.use(cors());
@@ -24,15 +23,15 @@ app.use((req, res, next) => {
 });
 
 // 3. Rutas
+// Importante: Vercel usará el prefijo /api que definamos en vercel.json
 app.use('/api/tasks', taskRoutes);
 
 app.get('/', (req: Request, res: Response) => {
-  res.send('API de TaskFlow funcionando 🚀');
+  res.send('API de TaskFlow funcionando en Vercel 🚀');
 });
 
 // 4. Manejo de errores
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
-});
+// EXPORTACIÓN CRÍTICA PARA VERCEL
+export default app;
